@@ -1,6 +1,7 @@
 //global variables being declared.
 var myGamePiece;
-var secondGamePiece;
+var hideFace;
+var myGamePiece1;
 var myBackground;
 var myObstacles = [];
 var myScore;
@@ -8,12 +9,14 @@ var Btn = document.getElementById('accelerate');
 
 //when spacebar is pressed box goes up
 document.onkeydown = function(e){
+  myGamePiece.image.src='clicked.png';
  if(e.keyCode == 32) {
    accelerate(-0.2)
  }
 }
 //when you let go of space bar box is pulled back down by gravity.
 document.onkeyup = function(e){
+  myGamePiece.image.src ='aliveFace.png';
   if(e.keyCode == 32) {
    accelerate(0.1)
   }
@@ -26,6 +29,9 @@ document.getElementById('accelerate').onkeydown = function(e) {
  }
 };
 
+//  }
+//}
+
 //function changeImage(obj, img) {
 //  console.log(myGamePiece.image.src="sadFace.png");
 //}
@@ -34,8 +40,8 @@ document.getElementById('accelerate').onkeydown = function(e) {
 //invokes the method start() of myGameArea object added in the creation of the gamepiece modify this to add additional pieces to this game
 function startGame() {
 //after adding in a restart function you need to clear the array before the start of the game
+//	//last rendered so it's showing ontop
 	myGamePiece = new component(30, 30, "aliveFace.png", 10,120, 'image');
-	myGamePiece1 = new component(30, 30, "sadFace.png", 10,120,'image');
 	myBackground = new component(480, 370, "background-image.png",0,0,"background");
   myObstacles = [];
   myScore = new component('30px','Consolas', 'black', 400, 40,'text');
@@ -51,15 +57,7 @@ function restartGame() {
   startGame();
   
 }
-//use the hide the second image
-function changeImage() {
-  for(let z=0; z < myObstacles.length; z++){
-  if(myGamePiece1.crashWith(myObstacles[z])){
-    console.log(myGamePiece1)
-  
-    }
-  }
-}
+
 //stop the game / clear / restart
  
 //we will add more properties and methods to this object
@@ -74,12 +72,16 @@ var myGameArea = {
 //set current frames to be zero
 		this.frameNo = 0;
 		this.interval = setInterval(updateGameArea, 20);
+	
 	},
 	clear : function() {
 		this.context.clearRect(0,0, this.canvas.width, this.canvas.height);
 	},
 	stop : function() { //clearInterval = stops the 20 milisecond interval for gameArea
+	  
 	 clearInterval(this.interval);
+	 
+   
 	    
 	  }
 	};
@@ -91,11 +93,11 @@ function everyinterval(n){
 }
 
 //created a master function to make the components of the game.
-function component(width, height, color, x, y, type) {
+function component(width, height, image, x, y, type) {
   this.type = type;
   if(type == "image" || type =="background") {
     this.image = new Image();
-    this.image.src = color;
+    this.image.src = image;
   }
 	this.width = width;
 	this.height = height;
@@ -111,15 +113,15 @@ function component(width, height, color, x, y, type) {
 //accounting for the the component being the score and the data being text.
 	 if(this.type == 'text'){
 	 ctx.font = this.width + ' ' + this.height;
-	 ctx.fillStyle = color;
+	 ctx.fillStyle = image;
 	 ctx.fillText(this.text, this.x, this.y);
 	 } else if(type =='image' || type == 'background') {
 	  ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
 	  if(type == 'background') {
 	    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height)
 	  }
-	  } else { //if it's not text draw the face icon.
-	ctx.fillStyle = color;
+	  } else { //this draws the walls.
+	ctx.fillStyle = image;
 	ctx.fillRect(this.x, this.y, this.width, this.height);
 	  }
 	}
@@ -144,6 +146,11 @@ function component(width, height, color, x, y, type) {
 	        this.gravitySpeed = 0;
 	      }
 	    }
+	    
+	    this.hide = function() {
+	      myGamePiece;
+	      
+	    }
 //prevents object from going off the top of the map.
 	    this.stopAtTop = function() {
 	      var  hitTop = myGameArea.canvas.height > this.height;
@@ -165,22 +172,26 @@ function component(width, height, color, x, y, type) {
 	  var othertop = otherobj.y;
 	  var otherbottom = otherobj.y + (otherobj.height);
 	  var crash = true;
-	//mybottom  = localtion y + object's height < location of the other obj's y location
+	  
+	//mybottom  = localtion y + object's height < location of the other obj's y location. To change the image something needs to be done here.
 	  if((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) ||
 	  (myleft > otherright)) {
 	    crash  = false;
 	  }
-	  
+	 
+    
 	  return crash;
+	
 	  
 	}
 }
 //required changes to allow multiple obstacles to be made.
 function updateGameArea() {
+  
   var x,height,gap, minHeight, maxHeight, minGap, maxGap;
   for(i = 0; i < myObstacles.length; i ++) {
     if(myGamePiece.crashWith(myObstacles[i])) {
-      changeImage();
+    myGamePiece.
       myGameArea.stop();
       
     
@@ -202,6 +213,7 @@ function updateGameArea() {
     minGap = 50;
     maxGap = 200;
     gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
+    
   
 //new generator for new obstacles first one generates objects on the bottom
     myObstacles.push(new component(10, height, 'green', x, 0));
@@ -216,8 +228,6 @@ function updateGameArea() {
   myScore.update();
   myGamePiece.newPos();
   myGamePiece.update();
-  myGamePiece1.newPos();
-  myGamePiece1.update();
 
 /* we needed to switch this from myobstacle to an array so that we could generate
 more than 1 obstacle.
@@ -236,6 +246,8 @@ more than 1 obstacle.
   }
 }
 */
+//use the hide the second image
+
 
 }
 /*
@@ -258,13 +270,18 @@ function moveright() {
 
 function accelerate(n) {
   myGamePiece.gravity = n;
-  myGamePiece1.gravity = n;
+  if(myGamePiece.gravity > 0) {
+    myGamePiece.image.src='aliveFace.png';
+  } else {
+    myGamePiece.image.src='clicked.png';
+  }
+
 }
 
 function clearmove(){
   myGamePiece.speedX = 0;
-  myGamePiece1.speedX = 0;
   myGamePiece.speedY = 0;
   myGamePiece.speedY = 0;
+  myGamePiece.image.src = 'clicked.png';
 }
   
