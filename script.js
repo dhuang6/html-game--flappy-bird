@@ -1,14 +1,41 @@
 //global variables being declared.
 var myGamePiece;
+var secondGamePiece;
 var myBackground;
 var myObstacles = [];
 var myScore;
+var Btn = document.getElementById('accelerate');
+
+//when spacebar is pressed box goes up
+document.onkeydown = function(e){
+ if(e.keyCode == 32) {
+   accelerate(-0.2)
+ }
+}
+//when you let go of space bar box is pulled back down by gravity.
+document.onkeyup = function(e){
+  if(e.keyCode == 32) {
+   accelerate(0.1)
+  }
+}
+//adding in space bar as an option to control box.
+document.getElementById('accelerate').onkeydown = function(e) {
+ if(event.keyCode ===32){
+   event.preventDefault();
+   document.querySelector('button').click(); //this will trigger a click on the first button
+ }
+};
+
+//function changeImage(obj, img) {
+//  console.log(myGamePiece.image.src="sadFace.png");
+//}
 
 
 //invokes the method start() of myGameArea object added in the creation of the gamepiece modify this to add additional pieces to this game
 function startGame() {
 //after adding in a restart function you need to clear the array before the start of the game
-	myGamePiece = new component(30, 30, 'red', 10,120);
+	myGamePiece = new component(30, 30, "aliveFace.png", 10,120, 'image');
+	myGamePiece1 = new component(30, 30, "sadFace.png", 10,120,'image');
 	myBackground = new component(480, 370, "background-image.png",0,0,"background");
   myObstacles = [];
   myScore = new component('30px','Consolas', 'black', 400, 40,'text');
@@ -22,8 +49,17 @@ function restartGame() {
   myGameArea.stop();
   myGameArea.clear();
   startGame();
+  
 }
-
+//use the hide the second image
+function changeImage() {
+  for(let z=0; z < myObstacles.length; z++){
+  if(myGamePiece1.crashWith(myObstacles[z])){
+    console.log(myGamePiece1)
+  
+    }
+  }
+}
 //stop the game / clear / restart
  
 //we will add more properties and methods to this object
@@ -82,7 +118,7 @@ function component(width, height, color, x, y, type) {
 	  if(type == 'background') {
 	    ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height)
 	  }
-	  } else { //if it's not text draw the red rectangle.
+	  } else { //if it's not text draw the face icon.
 	ctx.fillStyle = color;
 	ctx.fillRect(this.x, this.y, this.width, this.height);
 	  }
@@ -134,21 +170,25 @@ function component(width, height, color, x, y, type) {
 	  (myleft > otherright)) {
 	    crash  = false;
 	  }
+	  
 	  return crash;
+	  
 	}
 }
-//this is where you would add the function call to reset the game.
 //required changes to allow multiple obstacles to be made.
 function updateGameArea() {
   var x,height,gap, minHeight, maxHeight, minGap, maxGap;
   for(i = 0; i < myObstacles.length; i ++) {
     if(myGamePiece.crashWith(myObstacles[i])) {
+      changeImage();
       myGameArea.stop();
+      
     
-   
-      return;
+      
+       return;
     }
   }
+  
   myGameArea.clear();
   myBackground.speedX = -1;
   myBackground.newPos();
@@ -176,6 +216,9 @@ function updateGameArea() {
   myScore.update();
   myGamePiece.newPos();
   myGamePiece.update();
+  myGamePiece1.newPos();
+  myGamePiece1.update();
+
 /* we needed to switch this from myobstacle to an array so that we could generate
 more than 1 obstacle.
   if(myGamePiece.crashWith(myObstacle)) {
@@ -215,10 +258,13 @@ function moveright() {
 
 function accelerate(n) {
   myGamePiece.gravity = n;
+  myGamePiece1.gravity = n;
 }
 
 function clearmove(){
   myGamePiece.speedX = 0;
+  myGamePiece1.speedX = 0;
+  myGamePiece.speedY = 0;
   myGamePiece.speedY = 0;
 }
   
